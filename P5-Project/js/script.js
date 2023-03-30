@@ -10,10 +10,18 @@ let buttonCount = 0;
 let timerStart;
 let timer;
 
+let score = 0;
+let lives = 3;
+let difficulty = 1;
+let yThreshold;
+let numberCount = 3;
+let numbers = [];
+
 function setup() {
     createCanvas(windowWidth, windowHeight);
     background(0);
     // /noLoop();
+    yThreshold = height - 100;
 }
 
 function draw() {
@@ -42,6 +50,7 @@ function mainMenu() {
     textAlign(CENTER, CENTER);
     text('MCBLING SPEED TEXTER 3000', width / 2, height / 4);
 
+    //likely should replace this with a custom button (she is ugly)
     if (buttonCount < 1) {//drawing start button
         startButton = createButton('Start');
         startButton.size(200, 200)
@@ -72,6 +81,22 @@ function countdown() {
 
 function game() {
     background(0);
+    fill(255, 0, 0);
+    rect(0, yThreshold, width, 100);
+
+    if (numbers.length < numberCount) {
+        numbers.push(new Numbers(-500 * numbers.length));
+    }
+
+    for (i = 0; i < numbers.length; i++) {
+        numbers[i].move();
+        if (numbers[i].y > yThreshold) {
+            lives--;
+            print('lives ' + lives);
+        } if (numbers[i].y > height) {
+            numbers.splice(i, 1);
+        }
+    }
 }
 
 function end() {
@@ -80,11 +105,25 @@ function end() {
 
 function startCountdown() {
     timerStart = millis();
-    sceneIndex = 1;
+    sceneIndex = 2;
     print(sceneIndex);
     startButton.hide();
 }
 
 function startGame() {
     sceneIndex = 2;
+}
+
+class Numbers {
+    constructor(value) {
+        this.x = width / 2;
+        this.y = value;
+        this.speed = 5;
+        this.number = int(random(0, 9));
+    }
+
+    move() {
+        text(this.number, this.x, this.y);
+        this.y += this.speed;
+    }
 }
