@@ -4,6 +4,8 @@ let sceneIndex = 0;
 // 2 = gameplay
 // 3 = ending
 let startButton;
+let timerStart;
+let timer;
 
 function setup() {
     createCanvas(windowWidth, windowHeight);
@@ -38,12 +40,27 @@ function mainMenu() {
     startButton = createButton('Start');
     startButton.size(200, 200)
     startButton.position(width / 2, height / 1.5);
-    startButton.mousePressed(nextScene);
+    startButton.mousePressed(startCountdown);
 
 }
 
 function countdown() {
     background(0);
+    if (millis() <= timerStart + 1000) {
+        timer = 3;
+    } else if (millis() <= timerStart + 2000) {
+        timer = 2;
+    }
+    else if (millis() <= timerStart + 3000) {
+        timer = 1;
+    } else {
+        startGame();
+    }
+
+    textSize(120);
+    fill(255);
+    textAlign(CENTER, CENTER);
+    text(timer, width / 2, height / 4);
 }
 
 function game() {
@@ -54,7 +71,12 @@ function end() {
     background(0);
 }
 
-function nextScene() {
-    sceneIndex++;
+function startCountdown() {
+    timerStart = millis();
+    sceneIndex = 1;
     print(sceneIndex);
+}
+
+function startGame() {
+    sceneIndex = 2;
 }
