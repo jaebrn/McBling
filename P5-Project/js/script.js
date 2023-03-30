@@ -18,7 +18,7 @@ let numberCount = 3;
 let numbers = [];
 
 function setup() {
-    createCanvas(windowWidth, windowHeight);
+    createCanvas(1440, 1080);
     background(0);
     // /noLoop();
     yThreshold = height - 100;
@@ -45,7 +45,7 @@ function draw() {
 
 function mainMenu() {
     //drawing title
-    textSize(180);
+    textSize(72);
     fill(255);
     textAlign(CENTER, CENTER);
     text('MCBLING SPEED TEXTER 3000', width / 2, height / 4);
@@ -53,7 +53,7 @@ function mainMenu() {
     //likely should replace this with a custom button (she is ugly)
     if (buttonCount < 1) {//drawing start button
         startButton = createButton('Start');
-        startButton.size(200, 200)
+        startButton.size(200, 100)
         startButton.position(width / 2, height / 1.5);
         startButton.mousePressed(startCountdown);
         buttonCount++;
@@ -84,8 +84,9 @@ function game() {
     fill(255, 0, 0);
     rect(0, yThreshold, width, 100);
 
+    //Number spawning
     if (numbers.length < numberCount) {
-        numbers.push(new Numbers(-500 * numbers.length));
+        numbers.push(new Numbers(-500 * numbers.length)); // needs to be changed to be flexible
     }
 
     for (i = 0; i < numbers.length; i++) {
@@ -93,19 +94,28 @@ function game() {
         if (numbers[i].y > yThreshold) {
             lives--;
             print('lives ' + lives);
-        } if (numbers[i].y > height) {
             numbers.splice(i, 1);
         }
+    }
+
+    printScore();
+    printLives();
+
+    if (lives <= 0) {
+        sceneIndex = 3;
     }
 }
 
 function end() {
     background(0);
+    textSize(70);
+    text("Game Over :(", width / 2, height / 2);
+    startButton.show();
 }
 
 function startCountdown() {
     timerStart = millis();
-    sceneIndex = 2;
+    sceneIndex = 1;
     print(sceneIndex);
     startButton.hide();
 }
@@ -114,15 +124,28 @@ function startGame() {
     sceneIndex = 2;
 }
 
+function printLives() {
+    textSize(46);
+    fill(255);
+    text("Lives: " + lives, 100, 100);
+}
+
+function printScore() {
+    textSize(46);
+    fill(255);
+    text("Score: " + score, width - 100, 100);
+}
+
 class Numbers {
     constructor(value) {
         this.x = width / 2;
         this.y = value;
-        this.speed = 5;
+        this.speed = 5; // should increase with difficulty
         this.number = int(random(0, 9));
     }
 
     move() {
+        textSize(96);
         text(this.number, this.x, this.y);
         this.y += this.speed;
     }
