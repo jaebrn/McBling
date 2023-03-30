@@ -3,13 +3,17 @@ let sceneIndex = 0;
 // 1 = 3,2,1
 // 2 = gameplay
 // 3 = ending
-let startButton;
+
+var startButton;
+let buttonCount = 0;
+
 let timerStart;
 let timer;
 
 function setup() {
     createCanvas(windowWidth, windowHeight);
     background(0);
+    // /noLoop();
 }
 
 function draw() {
@@ -27,21 +31,24 @@ function draw() {
             end();
             break;
     }
+
+    // print(sceneIndex);
 }
 
 function mainMenu() {
     //drawing title
-    textSize(120);
+    textSize(180);
     fill(255);
     textAlign(CENTER, CENTER);
     text('MCBLING SPEED TEXTER 3000', width / 2, height / 4);
 
-    //drawing start button
-    startButton = createButton('Start');
-    startButton.size(200, 200)
-    startButton.position(width / 2, height / 1.5);
-    startButton.mousePressed(startCountdown);
-
+    if (buttonCount < 1) {//drawing start button
+        startButton = createButton('Start');
+        startButton.size(200, 200)
+        startButton.position(width / 2, height / 1.5);
+        startButton.mousePressed(startCountdown);
+        buttonCount++;
+    }
 }
 
 function countdown() {
@@ -57,10 +64,10 @@ function countdown() {
         startGame();
     }
 
-    textSize(120);
+    textSize(240);
     fill(255);
     textAlign(CENTER, CENTER);
-    text(timer, width / 2, height / 4);
+    text(timer, width / 2, height / 2);
 }
 
 function game() {
@@ -75,6 +82,7 @@ function startCountdown() {
     timerStart = millis();
     sceneIndex = 1;
     print(sceneIndex);
+    startButton.hide();
 }
 
 function startGame() {
