@@ -20,6 +20,10 @@ let numbers = [];
 //Thomas variables
 var p1Input = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']; //keyTyped inputs for player 1, numbers 0 through 9
 var p2Input = ['q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p']; //same but for player2, represents numbers 0 through 9
+let numbers2 = [];
+let score2 = 0;
+var playerCount = 0;
+var startButton2;
 
 function setup() {
     createCanvas(1440, 1080);
@@ -62,6 +66,20 @@ function mainMenu() {
         startButton.mousePressed(startCountdown);
         buttonCount++;
     }
+
+    if(buttonCount < 2){
+        startButton2 = createButton('Start 2 player');
+        startButton2.size(200, 100);
+        startButton2.position(width / 4, height / 1.5);
+        startButton2.mousePressed(startCountdown2);
+        buttonCount++;
+    }
+
+    if(buttonCount > 1){
+        //startButton.remove();
+        //startButton2.remove();
+    }
+    
 }
 
 function countdown() {
@@ -89,18 +107,40 @@ function game() {
     rect(0, yThreshold, width, 100);
 
     //Number spawning
-    if (numbers.length < numberCount) {
-        numbers.push(new Numbers(-500 * numbers.length)); // needs to be changed to be flexible
+    if(playerCount == 1){ //single player
+        if (numbers.length < numberCount) {
+            numbers.push(new Numbers(-500 * numbers.length, width / 2)); // needs to be changed to be flexible
+        }
+    }else{ //two player
+        if (numbers.length < numberCount) { //for player 1
+            numbers.push(new Numbers(-500 * numbers.length, width / 4)); // needs to be changed to be flexible
+        }
+
+        if(numbers2.length < numberCount){ //for player 2
+            numbers2.push(new Numbers(-500 * numbers2.length, width * 0.75));
+        }
     }
+    
 
     for (i = 0; i < numbers.length; i++) {
         numbers[i].move();
         if (numbers[i].y > height) { //height was yThreshold, now using it as the "hit" area to hit numbers in
-            lives--;
+          //  lives--; commented out for testing purposes heehee
             print('lives ' + lives);
             numbers.splice(i, 1);
         }
     }
+
+    if(playerCount == 2){ //manages movement of numbers for player 2
+        for(var j = 0; j < numbers2.length; j++){
+            numbers2[j].move();
+            if(numbers2[j].y > height){
+                //there should be player 2 lives here but whatever
+                numbers2.splice(j, 1);
+            }
+        }
+    }
+  
 
     printScore();
     printLives();
@@ -117,11 +157,23 @@ function end() {
     startButton.show();
 }
 
-function startCountdown() {
+function startCountdown() { //start button ID is used to tell how many players are playing
+    playerCount = 1;
     timerStart = millis();
     sceneIndex = 1;
     print(sceneIndex);
     startButton.hide();
+    startButton2.hide();
+}
+
+//also thomas
+function startCountdown2(){
+    playerCount = 2;
+    timerStart = millis();
+    sceneIndex = 1;
+    print(sceneIndex);
+    startButton.hide();
+    startButton2.hide();
 }
 
 function startGame() {
@@ -141,8 +193,8 @@ function printScore() {
 }
 
 class Numbers {
-    constructor(value) {
-        this.x = width / 2;
+    constructor(value, xPos) {
+        this.x = xPos;
         this.y = value;
         this.speed = 5; // should increase with difficulty
         this.number = int(random(0, 9));
@@ -187,7 +239,9 @@ function gameInput(value){
     }
     print("received input " + numberID + "for player " + playerID);
     //check if an onscreen number matches the input
-    var received = false; //basically if this is true it will stop checking for a number onscreen, so if theres duplicate numbers on screen it should only destroy the closest one.
+    //the copy pasting of stuff did a fucking number on the formatting fml
+    if(playerID == 1){
+        var received = false; //basically if this is true it will stop checking for a number onscreen, so if theres duplicate numbers on screen it should only destroy the closest one.
     for(var l = 0; l < numbers.length; l++){
         if(!received){
             if(numberID == numbers[l].number){
@@ -199,4 +253,21 @@ function gameInput(value){
             }
         }
     }
+
+    }else if(playerID == 2){
+        var received = false; //basically if this is true it will stop checking for a number onscreen, so if theres duplicate numbers on screen it should only destroy the closest one.
+    for(var l = 0; l < numbers2.length; l++){
+        if(!received){
+            if(numberID == numbers2[l].number){
+                if(numbers2[l].y >= yThreshold){
+                    score++;
+                    numbers2.splice(l, 1);
+                    received = true;
+                }
+            }
+        }
+    }
+
+    }
+    
 }
