@@ -17,6 +17,10 @@ let yThreshold;
 let numberCount = 3;
 let numbers = [];
 
+//Thomas variables
+var p1Input = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']; //keyTyped inputs for player 1, numbers 0 through 9
+var p2Input = ['q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p']; //same but for player2, represents numbers 0 through 9
+
 function setup() {
     createCanvas(1440, 1080);
     background(0);
@@ -91,7 +95,7 @@ function game() {
 
     for (i = 0; i < numbers.length; i++) {
         numbers[i].move();
-        if (numbers[i].y > yThreshold) {
+        if (numbers[i].y > height) { //height was yThreshold, now using it as the "hit" area to hit numbers in
             lives--;
             print('lives ' + lives);
             numbers.splice(i, 1);
@@ -148,5 +152,51 @@ class Numbers {
         textSize(96);
         text(this.number, this.x, this.y);
         this.y += this.speed;
+    }
+}
+
+//Thomas made this
+function keyTyped(){ //automatically receives key inputs
+    getInput(key);
+}
+
+function getInput(value){ //sorts out what to do with key input based on scene index
+    print(value);
+    switch(sceneIndex){
+        case 2: //game input
+            gameInput(value);
+        break;
+    }
+}
+
+function gameInput(value){
+    var numberID; //which number is this key associated with
+    var playerID; //which player is this key associated with
+    for(var i = 0; i < p1Input.length; i++){
+        if(p1Input[i] == value){
+            numberID = i;
+            playerID = 1;
+        }
+    }
+
+    for(var j = 0; j < p2Input.length; j++){
+        if(p2Input[j] == value){
+            numberID = j;
+            playerID = 2;
+        }
+    }
+    print("received input " + numberID + "for player " + playerID);
+    //check if an onscreen number matches the input
+    var received = false; //basically if this is true it will stop checking for a number onscreen, so if theres duplicate numbers on screen it should only destroy the closest one.
+    for(var l = 0; l < numbers.length; l++){
+        if(!received){
+            if(numberID == numbers[l].number){
+                if(numbers[l].y >= yThreshold){
+                    score++;
+                    numbers.splice(l, 1);
+                    received = true;
+                }
+            }
+        }
     }
 }
