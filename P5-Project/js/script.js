@@ -128,18 +128,18 @@ function game() {
         noFill();
         strokeWeight(5);
         stroke(0, 255, 0);
-        square(width / 2, yThreshold, thresholdHeight);
+        square(width / 2, yThreshold - 5, thresholdHeight);
     }else if(playerCount == 2){
         //p1
        // fill(0, 255, 0);
         noFill();
         strokeWeight(5);
         stroke(0, 255, 0);
-        square(width / 4, yThreshold, thresholdHeight);
+        square(width / 4, yThreshold - 5, thresholdHeight);
         //p2
        // fill(0, 0, 255);
        stroke(0, 0, 255);
-        square(width * 0.75, yThreshold, thresholdHeight);
+        square(width * 0.75, yThreshold - 5, thresholdHeight);
 
     }
     rectMode(CORNER); //just using CENTER to draw the hit zones tbh
@@ -185,6 +185,7 @@ function end() {
     textSize(70);
     text("Game Over :(", width / 2, height / 2);
     startButton.show();
+    startButton2.show();
 }
 
 function startCountdown() { //start button ID is used to tell how many players are playing
@@ -267,6 +268,15 @@ function getInput(value){ //sorts out what to do with key input based on scene i
     switch(sceneIndex){
         case 2: //game input
             gameInput(value);
+        break;
+        case 0: //main menu
+            if(value == "Enter"){//1 player
+                startCountdown();
+            }
+
+            if(value == ' '){//2 player
+                startCountdown2();
+            }
         break;
     }
 }
@@ -391,20 +401,3 @@ function SpawnNumber(player){ //called by NumberSpawnerTimer when a timer runs o
         }
     }
 }
-
-/*
- //Number spawning
-    if(playerCount == 1){ //single player
-        if (numbers.length < numberCount) {
-            numbers.push(new Numbers(-500 * numbers.length, width / 2)); // needs to be changed to be flexible
-        }
-    }else{ //two player
-        if (numbers.length < numberCount) { //for player 1
-            numbers.push(new Numbers(-500 * numbers.length, width / 4)); // needs to be changed to be flexible
-        }
-
-        if(numbers2.length < numberCount){ //for player 2
-            numbers2.push(new Numbers(-500 * numbers2.length, width * 0.75));
-        }
-    }
-     */
