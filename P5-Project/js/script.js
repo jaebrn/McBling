@@ -37,10 +37,34 @@ var timer1 = 0;
 var timer2 = 0;
 var timerLimit1 = 1000;
 var timerLimit2 = 1000;
-var timerMIN = 100;
+var timerMIN = 250;
 var timerMAX = 1000;
 //timers are in milliseconds, so 1000 is one second
 
+//audio
+var songNames = [];
+var songList = [];
+var songIndex = 0;
+var songTitle = "";
+var songPlaying = true; //turns to false when song is completed playing
+
+function preload(){
+    loadSongs();
+}
+
+function loadSongs(){ //put all audio file loading in here
+    soundFormats('mp3');
+    songList.push(loadSound('song/Butterfly-Smile.dk.mp3'));
+    songNames.push("Buttefly - Smile.dk");
+    songList.push(loadSound('song/Captain_Jack-Captain_Jack.mp3'));
+    songNames.push("Captain Jack - Captain Jack");
+    songList.push(loadSound('song/Dreamscape-009_Sound_System.mp3'));
+    songNames.push("Dreamscape - 009 Sound System");
+    songList.push(loadSound('song/Stamp_On_The_Ground-Italobrothers.mp3'));
+    songNames.push("Stamp On The Ground - Italobrothers");
+    songList.push(loadSound('song/STEALTH-Love,Life,Happiness.mp3'));
+    songNames.push("Love, Life, & Happiness - STEALTH");
+}
 
 function setup() {
     createCanvas(1440, 1080);
@@ -50,6 +74,7 @@ function setup() {
 }
 
 function draw() {
+    background(0);
     switch (sceneIndex) { //scene management
         case 0:
             mainMenu();
@@ -74,6 +99,7 @@ function mainMenu() {
     fill(255);
     textAlign(CENTER, CENTER);
     text('MCBLING SPEED TEXTER 3000', width / 2, height / 4);
+    drawSongTitles();
 
     //likely should replace this with a custom button (she is ugly)
     if (buttonCount < 1) {//drawing start button
@@ -97,6 +123,11 @@ function mainMenu() {
         //startButton2.remove();
     }
     
+}
+
+function drawSongTitles(){
+    songTitle = "";
+    songTitle = text("< " + songNames[songIndex] + " >", width/2, height/2);
 }
 
 function countdown() {
@@ -154,7 +185,7 @@ function game() {
         numbers[i].move();
         if (numbers[i].y > height) { //height was yThreshold, now using it as the "hit" area to hit numbers in
           //  lives--; commented out for testing purposes heehee
-          scoreMult1 = 1;
+            scoreMult1 = 1;
             print('lives ' + lives);
             numbers.splice(i, 1);
         }
@@ -183,9 +214,22 @@ function game() {
 function end() {
     background(0);
     textSize(70);
-    text("Game Over :(", width / 2, height / 2);
+    if(playerCount == 1){
+      //  text("Game Over :(", width / 2, height / 2);
+      text("Score:" + score, width/2, height/2);
+    }else if(playerCount == 2){
+        text("Player 1 Score:" + score, width/4, height/4);
+        text("Player 2 Score:" + score2, width * 0.75, height/4);
+        if(score > score2){
+            text("Player 1 Wins!", width/2, height/2);
+        }else{
+            text("Player 2 Wins!", width/2, height/2);
+        }
+    }
+    
+    /*
     startButton.show();
-    startButton2.show();
+    startButton2.show();*/
 }
 
 function startCountdown() { //start button ID is used to tell how many players are playing
@@ -209,7 +253,14 @@ function startCountdown2(){
 
 function startGame() {
     sceneIndex = 2;
+    songList[songIndex].play();
+    songList[songIndex].onended(endsong);
 }
+
+function endsong(){
+    print("song has ended");
+    songPlaying = false
+};
 
 function printLives() {
     textSize(46);
@@ -270,13 +321,52 @@ function getInput(value){ //sorts out what to do with key input based on scene i
             gameInput(value);
         break;
         case 0: //main menu
-            if(value == "Enter"){//1 player
-                startCountdown();
-            }
+        menuInput(value);
+        break;
+        case 3:
+        endInput(value);
+        break;
+    }
+}
 
-            if(value == ' '){//2 player
-                startCountdown2();
+function menuInput(value){
+    switch(value){
+        case "Enter":
+            startCountdown(); //1 player start
+        break;
+
+        case ' ': //2 player start
+            startCountdown2();
+        break;
+
+        case '6': //next song
+        case '8':
+        case 'i':
+        case 'y':
+            songIndex++;
+            if(songIndex > songList.length - 1 || songIndex > songNames.length - 1){
+                songIndex = 0;
             }
+        break;
+
+        case '4': //previous song
+        case '2':
+        case 'r':
+        case 'w':
+            songIndex--;
+            if(songIndex < 0){
+                songIndex = songList.length - 1;
+            }
+        break;
+    }
+}
+
+function endInput(value){
+    switch(value){
+        case "Enter":
+        case ' ':
+            sceneIndex = 0;
+            songPlaying = true;
         break;
     }
 }
@@ -371,23 +461,28 @@ function scorePoints(player, ypos){
 }
 
 function NumberSpawnerTimer(){ //manages timers to spawn numbers for players
-    //p1
-    timer1 += deltaTime;
-    if(timer1 >= timerLimit1){
-        SpawnNumber(1);
-        timer1 = 0;
-        timerLimit1 = random(timerMIN, timerMAX);
-    }
+    if(songPlaying == true){
+//p1
+timer1 += deltaTime;
+if(timer1 >= timerLimit1){
+    SpawnNumber(1);
+    timer1 = 0;
+    timerLimit1 = random(timerMIN, timerMAX);
+}
 
-    //p2
-    if(playerCount == 2){
-        timer2 += deltaTime;
-        if(timer2 >= timerLimit2){
-            SpawnNumber(2);
-            timer2 = 0;
-            timerLimit2 = random(timerMIN, timerMAX);
-        }
+//p2
+if(playerCount == 2){
+    timer2 += deltaTime;
+    if(timer2 >= timerLimit2){
+        SpawnNumber(2);
+        timer2 = 0;
+        timerLimit2 = random(timerMIN, timerMAX);
     }
+}
+    }else{
+        sceneIndex = 3;
+    }
+    
 }
 
 function SpawnNumber(player){ //called by NumberSpawnerTimer when a timer runs out to ACTUALLY spawn a timer
@@ -401,3 +496,4 @@ function SpawnNumber(player){ //called by NumberSpawnerTimer when a timer runs o
         }
     }
 }
+
