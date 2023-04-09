@@ -4,27 +4,31 @@ let sceneIndex = 0;
 // 2 = gameplay
 // 3 = ending
 
-var startButton, startButton2; // single and multiplayer start buttons
+var startButton; // singleplayer start button
+var startButton2; // multiplayer start button
 var playerCount = 0; // number of players
 let buttonCount = 0; // number of buttons
 
 let timerStart; // time (millis()) when timer begins
 let timer; //countdown timer
 
-let score, score2 = 0; // P1 & P2 scores
+let score = 0; // P1 scores
+let score2 = 0; // P2 scores
 let lives = 3; // number of lives
 
 let yThreshold; // Y co-ord where numbers should be input
 let numberCount = 3; // # of numbers
-let numbers, numbers2 = []; // arrays storing numbers for P1 & P2
+let numbers = []; // arrays storing numbers for P1
+let numbers2 = []; // arrays storing numbers for P2
 
 //Input variables
 var p1Input = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']; //keyTyped inputs for player 1, numbers 0 through 9
 var p2Input = ['p', 'q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o']; //same but for player2, represents numbers 0 through 9
 
 //score multiplier
-var scoreMult1, scoreMult2 = 1; // score multipliers for P1 & P2
-var scoreMultInc = 0.1;
+var scoreMult1 = 1;// score multipliers for P1
+var scoreMult2 = 1; // score multipliers for P2
+var scoreMultInc = 0.05;
 var thresholdHeight = 100;
 var hitScore = 100; //base value for a hit is 100 * by the position difference between the letter and the hitbox
 
@@ -41,6 +45,7 @@ var timerMAX = 1000;
 var songNames = [];
 var songList = [];
 var songIndex = 0;
+var prevSong;
 var songTitle = "";
 var songPlaying = true; //turns to false when song is completed playing
 
@@ -52,10 +57,14 @@ let amt = 0;
 //images
 var corners;
 
+//fonts
+var font;
+
 function preload() {
-    //loads songs and images
+    //loads songs, fonts and images
     loadSongs();
     corners = loadImage('assets/images/corners.png');
+    font = loadFont('assets/fonts/DS.ttf')
 }
 
 function loadSongs() { //put all audio file loading in here
@@ -78,6 +87,10 @@ function setup() {
 
     bgStart = color(190, 150, 30);
     bgNew = color(255, 50, 255);
+
+    songIndex = int(random(songNames.length));
+
+    textFont(font);
 }
 
 function draw() {
@@ -117,48 +130,60 @@ function bg() {
     rect(width / 2, height / 2 + 20, width / 1.2, height / 1.3, 20); // translucent white screen outline
 
     image(corners, 0, 0, 1440, 1080); //draws corner cutouts
+
 }
 
 function mainMenu() {
+    print(songIndex);
     //drawing title
-    textSize(72);
     fill(255);
     textAlign(CENTER, CENTER);
+    textSize(135);
+    stroke(255, 100);
+    strokeWeight(20);
     text('MCBLING SPEED TEXTER 3000', width / 2, height / 4);
+    noStroke();
     drawSongTitles();
+    textSize(60);
+    text('Answer call to start', width / 2, height - 250);
+    text('Decline call to change song', width / 2, height - 200);
 
-    //likely should replace this with a custom button (she is ugly)
-    if (buttonCount < 1) {//drawing start button
-        startButton = createButton('Start');
-        startButton.size(200, 100)
-        startButton.position(width / 2, height / 1.5);
-        startButton.mousePressed(startCountdown);
-        buttonCount++;
-    }
+    // //likely should replace this with a custom button (she is ugly)
+    // if (buttonCount < 1) {//drawing start button
+    //     startButton = createButton('Start');
+    //     startButton.size(200, 100)
+    //     startButton.position(width / 2, height / 1.5);
+    //     startButton.mousePressed(startCountdown);
+    //     buttonCount++;
+    // }
 
-    if (buttonCount < 2) {
-        startButton2 = createButton('Start 2 player');
-        startButton2.size(200, 100);
-        startButton2.position(width / 4, height / 1.5);
-        startButton2.mousePressed(startCountdown2);
-        buttonCount++;
-    }
+    // if (buttonCount < 2) {
+    //     startButton2 = createButton('Start 2 player');
+    //     startButton2.size(200, 100);
+    //     startButton2.position(width / 4, height / 1.5);
+    //     startButton2.mousePressed(startCountdown2);
+    //     buttonCount++;
+    // }
 
-    if (buttonCount > 1) {
-        //startButton.remove();
-        //startButton2.remove();
-    }
-
+    // if (buttonCount > 1) {
+    //     //startButton.remove();
+    //     //startButton2.remove();
+    // }
 }
 
 function drawSongTitles() {
-    songTitle = text("< " + songNames[songIndex] + " >", width / 2, height / 2); //displays song title as text
+    textSize(100);
+    text('Now playing...', width / 2, height / 2 - 70);
+    textSize(120);
+    textWrap(WORD);
+    textLeading(105);
+    songTitle = text(songNames[songIndex], width / 2, height / 1.6 - 90, height / 1.25); //displays song title as text
 }
 
 function countdown() {
     timer = int(map(millis(), timerStart, timerStart + 3000, 4, 1)); // maps time to seconds (3, 2, 1...)
 
-    textSize(240);
+    textSize(340);
     fill(255);
     textAlign(CENTER, CENTER);
     text(timer, width / 2, height / 2); // displays timer as text
@@ -258,7 +283,6 @@ function startCountdown() { //start button ID is used to tell how many players a
     startButton2.hide();
 }
 
-//also thomas
 function startCountdown2() {
     playerCount = 2;
     timerStart = millis();
@@ -301,7 +325,6 @@ function printScore() {
         text("x" + scoreMult2, width, 200);
     }
 
-
     textAlign(CENTER);
 }
 
@@ -326,7 +349,6 @@ class Numbers {
     }
 }
 
-//Thomas made this
 function keyTyped() { //automatically receives key inputs
     getInput(key);
 }
@@ -510,6 +532,19 @@ function SpawnNumber(player) { //called by NumberSpawnerTimer when a timer runs 
             numbers.push(new Numbers(-500 * numbers.length, width / 4, 1)); // needs to be changed to be flexible
         } else if (player == 2) {
             numbers2.push(new Numbers(-500 * numbers2.length, width * 0.75, 2));
+        }
+    }
+}
+
+function keyPressed() {
+    if (sceneIndex == 0) { // if on menu.. 
+        if (keyCode === BACKSPACE || keyCode === TAB) { //if tab or backspace are pressed
+            prevSong = songIndex; // stores previous song
+            songIndex = int(random(songNames.length)); // rerandomizes song
+            if (songIndex == prevSong && songIndex < songNames.length) {
+                songIndex++;
+                songIndex %= songNames.length;
+            }
         }
     }
 }
