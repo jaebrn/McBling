@@ -52,6 +52,7 @@ var songPlaying = true; //turns to false when song is completed playing
 //colors
 let bgStart = (190, 150, 30);
 let bgNew = (255, 50, 255);
+let bgColor;
 let amt = 0;
 
 //images
@@ -114,13 +115,14 @@ function draw() {
 
 function bg() {
     // color changing gradient background 
-    background(lerpColor(bgStart, bgNew, amt));
+    bgColor = (lerpColor(bgStart, bgNew, amt));
     amt += 0.003;
     if (amt >= 1.5) {
         amt = 0.0;
         bgStart = bgNew;
         bgNew = color(random(255), random(255), random(255));
     }
+    background(bgColor);
 
     rectMode(CENTER);
     noStroke();
@@ -148,7 +150,7 @@ function mainMenu() {
     text('Answer call to start', width / 2, height - 250);
     text('Decline call to change song', width / 2, height - 200);
 
-    // //likely should replace this with a custom button (she is ugly)
+    // old start button code:
     // if (buttonCount < 1) {//drawing start button
     //     startButton = createButton('Start');
     //     startButton.size(200, 100)
@@ -245,6 +247,17 @@ function game() {
         }
     }
 
+    drawBorder();
+    drawProgress();
+
+    //game title:
+    fill(255);
+    textAlign(CENTER, CENTER);
+    textSize(80);
+    stroke(255, 100);
+    strokeWeight(10);
+    text('MCBLING SPEED TEXTER 3000', width / 2, 50);
+    noStroke();
 
     printScore();
     // printLives();
@@ -252,6 +265,47 @@ function game() {
     if (lives <= 0) {
         sceneIndex = 3;
     }
+}
+
+function drawProgress() {
+    // draws a progress bar which fills throughout the song
+    var x1 = width / 2 - 500;
+    var rectWidth = map(songList[songIndex].currentTime(), 0, songList[songIndex].duration(), 0, 1000);
+    print(songList[songIndex].currentTime())
+
+    noFill();
+    stroke(255);
+    strokeWeight(1);
+    rect(x1, height - 50, 1000, 20);
+    noStroke()
+    fill(255, 200);
+    rect(x1, height - 50, rectWidth, 20);
+
+
+}
+function drawBorder() {
+    //border overlays so numbers dont show off 'screen'
+    noStroke();
+    //upper
+    fill(bgColor);
+    rect(270, 0, 110, 144); // left
+    rect(width - 390, 0, 110, 144); // right
+    rect(width / 2 - 55, 0, 110, 144); //middle
+    // middle
+    fill(255, 100);
+    rect(270, 110, 110, 34); //l
+    rect(width - 390, 110, 110, 34); //r
+    rect(width / 2 - 55, 110, 110, 34); //m
+
+    //lower
+    fill(bgColor);
+    rect(305, height - 104, 110, 144); // l
+    rect(width - 415, height - 104, 110, 144); // r
+    rect(width / 2 - 55, height - 104, 110, 144); // m
+    fill(255, 100);
+    rect(305, height - 104, 110, 34);//l
+    rect(width - 415, height - 104, 110, 34);//r
+    rect(width / 2 - 55, height - 104, 110, 34); //m
 }
 
 function end() {
@@ -315,14 +369,14 @@ function printScore() {
     // text("Score: " + score, width - 100, 100);
     //p1
     textAlign(LEFT);
-    text("Score: " + score, 0, 100);
-    text("x" + scoreMult1, 0, 200);
+    text("Score: " + score, 150, 170);
+    text("x" + scoreMult1, 150, 205);
 
     if (playerCount == 2) {
         //p2
         textAlign(RIGHT);
-        text("Score: " + score2, width, 100);
-        text("x" + scoreMult2, width, 200);
+        text("Score: " + score2, width - 150, 170);
+        text("x" + scoreMult2, width - 150, 205);
     }
 
     textAlign(CENTER);
@@ -338,7 +392,7 @@ class Numbers {
     }
 
     move() {
-        textSize(96);
+        textSize(112);
         text(this.number, this.x, this.y);
         if (this.playerID == 1) {
             this.y += this.speed * scoreMult1;
