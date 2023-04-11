@@ -28,7 +28,7 @@ var p2Input = ['p', 'q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o']; //same but for
 //score multiplier
 var scoreMult1 = 1;// score multipliers for P1
 var scoreMult2 = 1; // score multipliers for P2
-var scoreMultInc = 0.05;
+var scoreMultInc = 0.1;
 var thresholdHeight = 100;
 var hitScore = 100; //base value for a hit is 100 * by the position difference between the letter and the hitbox
 
@@ -61,11 +61,37 @@ var corners;
 //fonts
 var font;
 
+//perfect 
+//these are timers used to track how long the "perfect" texts are gonna be up
+var perf1 = 1000;
+var perf2 = 1000;
+
+//confetti
+//little particle effects you can have here and there
+var ConfettiList = [];
+
+//gifs
+//blingeecore early internet stuff i found, stored here
+var giflist = [];
+var gifCount = 67;
+var activeGifList = [];
+var maxActiveGifs = 10;
+
 function preload() {
     //loads songs, fonts and images
     loadSongs();
+    loadGifs();
     corners = loadImage('assets/images/corners.png');
     font = loadFont('assets/fonts/DS.ttf')
+}
+
+function loadGifs(){
+    //giflist.push(loadImage('assets/gif/gif (1).gif'));
+    //testgif = loadImage('gif/gif(1).gif');
+    
+   for(var i = 0; i < gifCount - 1; i++){
+    giflist.push(loadImage('gif/gif(' + (i + 1) + ').gif'));
+   }
 }
 
 function loadSongs() { //put all audio file loading in here
@@ -84,7 +110,7 @@ function loadSongs() { //put all audio file loading in here
 
 function setup() {
     createCanvas(1440, 1080);
-    yThreshold = height - 100;
+    yThreshold = height - 200;
 
     bgStart = color(190, 150, 30);
     bgNew = color(255, 50, 255);
@@ -221,6 +247,16 @@ function game() {
     rectMode(CORNER); //just using CENTER to draw the hit zones tbh
     fill(255);
     noStroke();
+
+    //draw and manage gifs
+    renderGifs();
+
+    //draw confetti
+    drawConfetti();
+
+    //draw perfect texts and manage their timers
+    perfectVisual();
+
     //spawn numbers
     NumberSpawnerTimer();
 
@@ -231,8 +267,9 @@ function game() {
         if (numbers[i].y > height) { //height was yThreshold, now using it as the "hit" area to hit numbers in
             //  lives--; commented out for testing purposes heehee
             scoreMult1 = 1;
-            print('lives ' + lives);
+            //print('lives ' + lives);
             numbers.splice(i, 1);
+            cleanUpGifs(1);
         }
     }
 
@@ -243,6 +280,7 @@ function game() {
                 //there should be player 2 lives here but whatever
                 scoreMult2 = 1;
                 numbers2.splice(j, 1);
+                cleanUpGifs(2);
             }
         }
     }
@@ -271,7 +309,7 @@ function drawProgress() {
     // draws a progress bar which fills throughout the song
     var x1 = width / 2 - 500;
     var rectWidth = map(songList[songIndex].currentTime(), 0, songList[songIndex].duration(), 0, 1000);
-    print(songList[songIndex].currentTime())
+   // print(songList[songIndex].currentTime())
 
     noFill();
     stroke(255);
@@ -518,6 +556,7 @@ function gameInput(value) {
 }
 
 function scorePoints(player, ypos) {
+    var confettiCount = random(5, 25);
     var reward = 0;
     var posbonus = 0;
     if (player == 1) {
@@ -526,31 +565,73 @@ function scorePoints(player, ypos) {
         } else {
             posbonus = yThreshold / ypos;
         }
+        posbonus = (posbonus - 0.9) * 10;
         scoreMult1 += scoreMultInc;
         scoreMult1 = Math.round(scoreMult1 * 10) / 10; //the additional math being done makes it so the multiplier is rounded up to 1 digit
         reward = hitScore * scoreMult1;
         reward *= posbonus;
+        if(posbonus >= 0.9){//scoring a perfect hit
+           // scoreMult1 += scoreMultInc;
+            reward = reward * 2;
+            perf1 = 0;
+            confettiCount *= random(1, 10);
+        }
         score += reward;
         score = Math.round(score);
         print("posBonus is " + posbonus);
+        if(playerCount == 1){
+            createConfetti(width / 2, yThreshold, confettiCount);
+           // activeGifList.push(new blingee(random(width), random(height)));
+        }else{
+            createConfetti(width / 4, yThreshold, confettiCount);
+           // activeGifList.push(new blingee(random(width/2), random(height)));
+        }
+        DoWeCreateGif(1);
     }
 
     if (player == 2) {
+        
         if (ypos < yThreshold) {
             posbonus = ypos / yThreshold;
         } else {
             posbonus = yThreshold / ypos;
         }
+        posbonus = (posbonus - 0.9) * 10;
         scoreMult2 += scoreMultInc;
         scoreMult2 = Math.round(scoreMult2 * 10) / 10;
         reward = hitScore * scoreMult2;
         reward *= posbonus;
+        if(posbonus >= 0.9){//scoring a perfect hit
+         //   scoreMult2 += scoreMultInc;
+            reward = reward * 2;
+            perf2 = 0;
+            confettiCount *= random(1, 10);
+        }
         score2 += reward;
         score2 = Math.round(score2);
         print("posBonus is " + posbonus);
+        createConfetti(width * 0.75, yThreshold, confettiCount);
+        DoWeCreateGif(1);
+        //activeGifList.push(new blingee(random(width/2, width), random(height)));
     }
 
-    print("player " + player + " gains " + reward + " points");
+    print("player " + player + " gains " + reward + " points" + " score multiplier is " + scoreMult1);
+}
+
+function DoWeCreateGif(player){ //determines whether or not we create a new gif and if so where to create it, it adds one for every 0.5 multiplier gained.
+    if(player == 1){
+        if(scoreMult1 % 1 == 0 || scoreMult1 % 1 == 0.5){
+            if(playerCount == 1){
+                activeGifList.push(new blingee(random(width), random(height)));
+            }else{
+                activeGifList.push(new blingee(random(width/2), random(height)));
+            }
+        }
+    }else{
+        if(scoreMult2 % 1 == 0 || scoreMult2 % 1 == 0.5){
+            activeGifList.push(new blingee(random(width/2, width), random(height)));
+        }
+    }
 }
 
 function NumberSpawnerTimer() { //manages timers to spawn numbers for players
@@ -603,3 +684,113 @@ function keyPressed() {
     }
 }
 
+function perfectVisual(){ //draws a PERFECT!!! text whenever a perfect hit is scored (theres an error margin, perfect hits grant full score and double multiplier value)
+    if(perf1 < 1000){
+        textSize(224 * ((1000 - perf1) / 1000));
+        fill(random(155) + 100, random(155) + 100, random(155) + 100);
+        createConfetti(width / 5 + random(-200, 200), height / 2, random(1, 5));
+        text("PERFECT!!!", width / 5, height / 2);
+        perf1 += deltaTime;
+    }
+
+    if(perf2 < 1000){
+        textSize(224 * ((1000 - perf2) / 1000));
+        fill(random(155) + 100, random(155) + 100, random(155) + 100);
+        createConfetti(width * 0.8 + random(-200, 200), height / 2, random(1, 5));
+        text("PERFECT!!!", width * 0.8, height / 2);
+        perf2 += deltaTime;
+    }
+}
+
+function drawConfetti(){
+    for(var i = 0; i < ConfettiList.length; i++){
+        if(ConfettiList[i].x < 0 || ConfettiList[i].x > width || ConfettiList[i].y < 0 || ConfettiList[i].y > height){
+            ConfettiList.splice(i, 1);
+        }else{
+            ConfettiList[i].Move();
+        }
+    }
+}
+
+function createConfetti(x, y, count){
+    for(var i = 0; i < count; i++){
+        ConfettiList.push(new confetti(x, y));
+    }
+}
+
+class confetti{
+    constructor(posX, posY) {
+        this.x = posX;
+        this.y = posY;
+       // this.color = color(random(155) + 100, random(155) + 100, random(155) + 100);
+        this.velocity = 1 + random(25);
+        this.falloff = this.velocity / random(1, 10);
+        this.dir = random(-1, 1);
+        this.speed = random(10);
+    }
+
+    Move(){
+        this.y -= this.velocity;
+        this.velocity -= this.falloff;
+        this.x += this.dir * this.speed;
+        fill(random(155) + 100, random(155) + 100, random(155) + 100);
+        square(this.x, this.y, 5);
+    }
+}
+
+function renderGifs(){
+    //cleanup gifs if framerate drops
+    if(frameRate() < 50){
+        activeGifList.splice(0,1);
+    }
+    for(var i = 0; i < activeGifList.length; i++){
+        
+            activeGifList[i].bling();
+            if(activeGifList[i].timer >= activeGifList[i].lifetime){
+                activeGifList.splice(i,1);
+            }
+        
+    }
+}
+
+function cleanUpGifs(player){
+    if(playerCount == 1){
+        activeGifList.splice(0, activeGifList.length);
+    }else{
+        if(player == 1){
+            for(var i = 0; i < activeGifList.length; i++){
+                if(activeGifList[i].x <= width/2){
+                    activeGifList.splice(i, 1);
+                }
+            }
+        }else{
+            for(var i = 0; i < activeGifList.length; i++){
+                if(activeGifList[i].x >= width/2){
+                    activeGifList.splice(i, 1);
+                }
+            }
+        }
+    }
+}
+
+class blingee{
+    constructor(posX, posY){
+        this.x = posX;
+        this.y = posY;
+        this.i = Math.round(random(giflist.length - 1));
+        this.w = random(100, 500);
+        this.h = random(100, 500);
+        this.a = 255 * random(0.1, 0.75); //alpha values work on the 255 RGB scale
+        this.lifetime = random(10) * 1000;
+        this.timer = 0;
+    }
+
+    bling(){
+        tint(255, this.a);
+       // image(this.image, this.x, this.y);
+       // image(this.i, this.x, this.y, 100, 100);
+        image(giflist[this.i], this.x, this.y, this.w, this.h);
+        noTint();
+       // this.timer += deltaTime;
+    }
+}
