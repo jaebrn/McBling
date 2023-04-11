@@ -6,7 +6,7 @@ let sceneIndex = 0;
 
 var startButton; // singleplayer start button
 var startButton2; // multiplayer start button
-var playerCount = 0; // number of players
+var playerCount = 2; // number of players
 let buttonCount = 0; // number of buttons
 
 let timerStart; // time (millis()) when timer begins
@@ -248,21 +248,23 @@ function game() {
 
     rectMode(CENTER);
     if (playerCount == 1) {
-        // fill(0, 255, 0);
-        noFill();
-        strokeWeight(5);
-        stroke(0, 255, 0);
+        // fill(0, 255, 0, 255 * 0.2);
+        fill(166, 123, 0, 255 * 0.2);
+        //noFill();
+        strokeWeight(2.5);
+        stroke(166, 123, 0);
         square(width / 2, yThreshold - 5, thresholdHeight);
     } else if (playerCount == 2) {
         //p1
-        // fill(0, 255, 0);
-        noFill();
-        strokeWeight(5);
-        stroke(0, 255, 0);
+       //  fill(0, 255, 0, 255 * 0.2);
+       fill(166, 123, 0, 255 * 0.2);
+       // noFill();
+        strokeWeight(2.5);
+        stroke(166, 123, 0);
         square(width / 4, yThreshold - 5, thresholdHeight);
         //p2
-        // fill(0, 0, 255);
-        stroke(0, 0, 255);
+         fill(193, 193, 193, 255 * 0.2);
+        stroke(193, 193, 193);
         square(width * 0.75, yThreshold - 5, thresholdHeight);
 
     }
@@ -374,20 +376,26 @@ function drawBorder() {
 }
 
 function end() {
+   // print("running end()");
     textSize(70);
+    fill(255);
+   // square(width/2, height/2, 100);
     if (playerCount == 1) {
         //  text("Game Over :(", width / 2, height / 2);
-        text("Score:" + score, width / 2, height / 2);
+        text("Score: " + score, width / 2, height / 2);
     } else if (playerCount == 2) {
-        text("Player 1 Score:" + score, width / 4, height / 4);
-        text("Player 2 Score:" + score2, width * 0.75, height / 4);
+        text("" + score, width / 4, height / 4);
+        text("" + score2, width * 0.75, height / 4);
+        fill(random(155) + 100, random(155) + 100, random(155) + 100);
+        createConfetti(width/2 + random(-300, 300), height/2, random(5, 20));
+        textSize(140);
         if (score > score2) {
             text("Player 1 Wins!", width / 2, height / 2);
         } else {
             text("Player 2 Wins!", width / 2, height / 2);
         }
     }
-
+    drawConfetti();
     /*
     startButton.show();
     startButton2.show();*/
@@ -491,6 +499,7 @@ function getInput(value) { //sorts out what to do with key input based on scene 
 }
 
 function menuInput(value) {
+    print("key " + value + " pressed");
     switch (value) {
         case "Enter":
             startCountdown(); //1 player start
@@ -519,6 +528,10 @@ function menuInput(value) {
                 songIndex = songList.length - 1;
             }
             break;
+        //testing purposes
+        case 'x':
+            sceneIndex = 3;
+        break;
     }
 }
 
@@ -556,7 +569,7 @@ function gameInput(value) {
         for (var l = 0; l < numbers.length; l++) {
             if (!received) {
                 if (numberID == numbers[l].number) {
-                    if (numbers[l].y >= yThreshold - (thresholdHeight / 2)){
+                    if (numbers[l].y >= yThreshold - (thresholdHeight) && numbers[l].y <= yThreshold + (thresholdHeight)){
                         //score++;
                         scorePoints(1, numbers[l].y);
                         numbers.splice(l, 1);
@@ -571,7 +584,7 @@ function gameInput(value) {
         for (var l = 0; l < numbers2.length; l++) {
             if (!received) {
                 if (numberID == numbers2[l].number) {
-                    if (numbers2[l].y >= yThreshold - (thresholdHeight / 2)) {
+                    if (numbers2[l].y >= yThreshold - (thresholdHeight) && numbers2[l].y <= yThreshold + (thresholdHeight)) {
                         //score++;
                         scorePoints(2, numbers2[l].y);
                         numbers2.splice(l, 1);
@@ -888,7 +901,7 @@ function drawWaveForm(){ //renders a waveform visual based on the audio currentl
 function renderRipples(){
     for(var i = 0;i < rippleList.length; i++){
         rippleList[i].render();
-        if(rippleList[i].r >= width){
+        if(rippleList[i].r >= width * 2){
             rippleList.splice(i, 1);
         }
     }
