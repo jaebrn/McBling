@@ -6,7 +6,7 @@ let sceneIndex = 0;
 
 var startButton; // singleplayer start button
 var startButton2; // multiplayer start button
-var playerCount = 2; // number of players
+var playerCount = 0; // number of players
 let buttonCount = 0; // number of buttons
 
 let timerStart; // time (millis()) when timer begins
@@ -37,8 +37,8 @@ var timer1 = 0;
 var timer2 = 0;
 var timerLimit1 = 1000;
 var timerLimit2 = 1000;
-var timerMIN = 250;
-var timerMAX = 1000;
+var timerMIN = 500;
+var timerMAX = 2000;
 //timers are in milliseconds, so 1000 is one second
 
 //audio
@@ -118,6 +118,34 @@ function loadSongs() { //put all audio file loading in here
     songNames.push("Stamp On The Ground - Italobrothers");
     songList.push(loadSound('song/STEALTH-Love,Life,Happiness.mp3'));
     songNames.push("Love, Life, & Happiness - STEALTH");
+    songList.push(loadSound('song/Axel_F.mp3'));
+    songNames.push("Crazy Frog - Axel F");
+    songList.push(loadSound('song/hampsterdance.mp3'));
+    songNames.push("The HampsterDance Song");
+    songList.push(loadSound('song/sandstorm.mp3'));
+    songNames.push("Darude - Sandstorm");
+    songList.push(loadSound('song/bambambam.mp3'));
+    songNames.push("BAMBEE - Bam Bam Bam");
+    songList.push(loadSound('song/blue.mp3'));
+    songNames.push("Eiffel 65 - Blue (Da Ba Dee)");
+    songList.push(loadSound('song/kiss.mp3'));
+    songNames.push("Vengaboys - Kiss");
+    songList.push(loadSound('song/getgetdown.mp3'));
+    songNames.push("Paul Johnson - Get Get Down");
+    songList.push(loadSound('song/basshunter.mp3'));
+    songNames.push("Basshunter - I Can Walk On Water");
+    songList.push(loadSound('song/scatman.mp3'));
+    songNames.push("Scatman John - Scatman");
+    songList.push(loadSound('song/everytime_we_touch.mp3'));
+    songNames.push("CASCADA - Everytime We Touch");
+    songList.push(loadSound('song/daftpunk.mp3'));
+    songNames.push("Daft Punk - Harder,Better,Faster,Stronger");
+    songList.push(loadSound('song/boom.mp3'));
+    songNames.push("Vengaboys - Boom Boom Boom Boom");
+    songList.push(loadSound('song/50.mp3'));
+    songNames.push("50 Cent - In Da Club");
+    songList.push(loadSound('song/caramelldansen.mp3'));
+    songNames.push("Caramella Girls - Caramelldansen");
 }
 
 function setup() {
@@ -177,7 +205,7 @@ function bg() {
 }
 
 function mainMenu() {
-    print(songIndex);
+   // print(songIndex);
     //drawing title
     fill(255);
     textAlign(CENTER, CENTER);
@@ -405,7 +433,7 @@ function startCountdown() { //start button ID is used to tell how many players a
     playerCount = 1;
     timerStart = millis();
     sceneIndex = 1;
-    print(sceneIndex);
+   // print(sceneIndex);
     startButton.hide();
     startButton2.hide();
 }
@@ -414,7 +442,7 @@ function startCountdown2() {
     playerCount = 2;
     timerStart = millis();
     sceneIndex = 1;
-    print(sceneIndex);
+ //   print(sceneIndex);
     startButton.hide();
     startButton2.hide();
 }
@@ -426,7 +454,7 @@ function startGame() {
 }
 
 function endsong() {
-    print("song has ended");
+  //  print("song has ended");
     songPlaying = false
 };
 
@@ -484,7 +512,7 @@ function keyTyped() { //automatically receives key inputs
 }
 
 function getInput(value) { //sorts out what to do with key input based on scene index
-    print(value);
+   // print(value);
     switch (sceneIndex) {
         case 2: //game input
             gameInput(value);
@@ -499,7 +527,7 @@ function getInput(value) { //sorts out what to do with key input based on scene 
 }
 
 function menuInput(value) {
-    print("key " + value + " pressed");
+ //   print("key " + value + " pressed");
     switch (value) {
         case "Enter":
             startCountdown(); //1 player start
@@ -539,8 +567,8 @@ function endInput(value) {
     switch (value) {
         case "Enter":
         case ' ':
-            sceneIndex = 0;
-            songPlaying = true;
+           // sceneIndex = 0;
+            restart();
             break;
     }
 }
@@ -561,7 +589,7 @@ function gameInput(value) {
             playerID = 2;
         }
     }
-    print("received input " + numberID + "for player " + playerID);
+   // print("received input " + numberID + "for player " + playerID);
     //check if an onscreen number matches the input
     //the copy pasting of stuff did a fucking number on the formatting fml
     if (playerID == 1) {
@@ -621,7 +649,7 @@ function scorePoints(player, ypos) {
         }
         score += reward;
         score = Math.round(score);
-        print("posBonus is " + posbonus);
+      //  print("posBonus is " + posbonus);
         if(playerCount == 1){
             createConfetti(width / 2, yThreshold, confettiCount);
            // activeGifList.push(new blingee(random(width), random(height)));
@@ -653,14 +681,14 @@ function scorePoints(player, ypos) {
         }
         score2 += reward;
         score2 = Math.round(score2);
-        print("posBonus is " + posbonus);
+       // print("posBonus is " + posbonus);
         createConfetti(width * 0.75, yThreshold, confettiCount);
       //  DoWeCreateGif(1);
         //activeGifList.push(new blingee(random(width/2, width), random(height)));
         rippleList.push(new ripple(scoreMult2));
     }
 
-    print("player " + player + " gains " + reward + " points" + " score multiplier is " + scoreMult1);
+   // print("player " + player + " gains " + reward + " points" + " score multiplier is " + scoreMult1);
 }
 
 function DoWeCreateGif(player){ //determines whether or not we create a new gif and if so where to create it, it adds one for every 0.5 multiplier gained.
@@ -842,7 +870,7 @@ class blingee{
     }
 
     correctPos(){ //this makes it so the gifs should be rendered out of bounds, ish
-        print("running correctPos");
+      //  print("running correctPos");
         if(this.x > width / 2){
             this.x -= this.w / 2;
         }else{
@@ -922,4 +950,18 @@ class ripple{
         noFill();
         circle(this.x, this.y, this.r);
     }
+}
+
+function restart(){
+    score = 0;
+    score2 = 0;
+    numbers.splice(0, numbers.length);
+    numbers2.splice(0, numbers.length);
+    activeGifList.splice(0, activeGifList.length);
+    ConfettiList.splice(0, ConfettiList.length);
+    rippleList.splice(0, rippleList.length);
+    playerCount = 0;
+    songPlaying = true;
+    songIndex = 0;
+    sceneIndex = 0;
 }
