@@ -75,14 +75,26 @@ var ConfettiList = [];
 var giflist = [];
 var gifCount = 67;
 var activeGifList = [];
-var maxActiveGifs = 10;
+var maxActiveGifs = 0;
+var gifTimerLimit = 0;
+var gifTimer = 0;
+
+//waveform
+var fft; //idk what this is but the waveform requires it.
+var lerpColorSave; //saves the color used for jenna's borders to use for the waveform
+
+//ripples
+//expanding hollow circles that are created whenever a number is hit
+var rippleList = [];
 
 function preload() {
     //loads songs, fonts and images
     loadSongs();
     loadGifs();
     corners = loadImage('assets/images/corners.png');
-    font = loadFont('assets/fonts/DS.ttf')
+    font = loadFont('assets/fonts/DS.ttf');
+    maxActiveGifs = 1;
+    gifTimerLimit = random(1000, 5000);
 }
 
 function loadGifs(){
@@ -118,6 +130,8 @@ function setup() {
     songIndex = int(random(songNames.length));
 
     textFont(font);
+
+    fft = new p5.FFT();
 }
 
 function draw() {
@@ -149,6 +163,7 @@ function bg() {
         bgNew = color(random(255), random(255), random(255));
     }
     background(bgColor);
+    lerpColorSave = bgColor;
 
     rectMode(CENTER);
     noStroke();
@@ -224,6 +239,13 @@ function countdown() {
 function game() {
     // fill(255, 0, 0);
     //rect(0, yThreshold, width, 100);
+    //draw and manage gifs
+    renderGifs();
+    //draw waveForm
+    drawWaveForm();
+    //draw ripples
+    renderRipples();
+
     rectMode(CENTER);
     if (playerCount == 1) {
         // fill(0, 255, 0);
@@ -248,8 +270,7 @@ function game() {
     fill(255);
     noStroke();
 
-    //draw and manage gifs
-    renderGifs();
+    
 
     //draw confetti
     drawConfetti();
@@ -269,7 +290,7 @@ function game() {
             scoreMult1 = 1;
             //print('lives ' + lives);
             numbers.splice(i, 1);
-            cleanUpGifs(1);
+          //  cleanUpGifs(1);
         }
     }
 
@@ -280,10 +301,12 @@ function game() {
                 //there should be player 2 lives here but whatever
                 scoreMult2 = 1;
                 numbers2.splice(j, 1);
-                cleanUpGifs(2);
+              //  cleanUpGifs(2);
             }
         }
     }
+
+    
 
     drawBorder();
     drawProgress();
@@ -303,6 +326,7 @@ function game() {
     if (lives <= 0) {
         sceneIndex = 3;
     }
+    
 }
 
 function drawProgress() {
@@ -344,6 +368,9 @@ function drawBorder() {
     rect(305, height - 104, 110, 34);//l
     rect(width - 415, height - 104, 110, 34);//r
     rect(width / 2 - 55, height - 104, 110, 34); //m
+
+    //jenna hotfix from discord
+    image(corners, 0, 0, 1440, 1080); //draws corner cutouts
 }
 
 function end() {
@@ -408,13 +435,16 @@ function printScore() {
     //p1
     textAlign(LEFT);
     text("Score: " + score, 150, 170);
-    text("x" + scoreMult1, 150, 205);
+    textSize(46 * scoreMult1)
+    text("x" + scoreMult1, 150, 205 + (5 * scoreMult1));
 
     if (playerCount == 2) {
         //p2
+        textSize(46);
         textAlign(RIGHT);
         text("Score: " + score2, width - 150, 170);
-        text("x" + scoreMult2, width - 150, 205);
+        textSize(46 * scoreMult2)
+        text("x" + scoreMult2, width - 150, 205 + (5 * scoreMult2));
     }
 
     textAlign(CENTER);
@@ -526,7 +556,7 @@ function gameInput(value) {
         for (var l = 0; l < numbers.length; l++) {
             if (!received) {
                 if (numberID == numbers[l].number) {
-                    if (numbers[l].y >= yThreshold - (thresholdHeight / 2)) {
+                    if (numbers[l].y >= yThreshold - (thresholdHeight / 2)){
                         //score++;
                         scorePoints(1, numbers[l].y);
                         numbers.splice(l, 1);
@@ -586,7 +616,8 @@ function scorePoints(player, ypos) {
             createConfetti(width / 4, yThreshold, confettiCount);
            // activeGifList.push(new blingee(random(width/2), random(height)));
         }
-        DoWeCreateGif(1);
+        rippleList.push(new ripple(scoreMult1));
+       // DoWeCreateGif(1);
     }
 
     if (player == 2) {
@@ -611,8 +642,9 @@ function scorePoints(player, ypos) {
         score2 = Math.round(score2);
         print("posBonus is " + posbonus);
         createConfetti(width * 0.75, yThreshold, confettiCount);
-        DoWeCreateGif(1);
+      //  DoWeCreateGif(1);
         //activeGifList.push(new blingee(random(width/2, width), random(height)));
+        rippleList.push(new ripple(scoreMult2));
     }
 
     print("player " + player + " gains " + reward + " points" + " score multiplier is " + scoreMult1);
@@ -641,7 +673,7 @@ function NumberSpawnerTimer() { //manages timers to spawn numbers for players
         if (timer1 >= timerLimit1) {
             SpawnNumber(1);
             timer1 = 0;
-            timerLimit1 = random(timerMIN, timerMAX);
+            timerLimit1 = random(timerMIN * scoreMult1, timerMAX);
         }
 
         //p2
@@ -650,7 +682,7 @@ function NumberSpawnerTimer() { //manages timers to spawn numbers for players
             if (timer2 >= timerLimit2) {
                 SpawnNumber(2);
                 timer2 = 0;
-                timerLimit2 = random(timerMIN, timerMAX);
+                timerLimit2 = random(timerMIN * scoreMult2, timerMAX);
             }
         }
     } else {
@@ -740,17 +772,27 @@ class confetti{
 
 function renderGifs(){
     //cleanup gifs if framerate drops
-    if(frameRate() < 50){
-        activeGifList.splice(0,1);
+    if(frameRate() <= 40){
+        activeGifList.splice(0,activeGifList.length);
     }
+
     for(var i = 0; i < activeGifList.length; i++){
-        
-            activeGifList[i].bling();
-            if(activeGifList[i].timer >= activeGifList[i].lifetime){
-                activeGifList.splice(i,1);
-            }
-        
+        activeGifList[i].bling();
     }
+    gifTimer += deltaTime;
+    if(gifTimer >= gifTimerLimit){
+        for(var i = 0; i < activeGifList.length; i++){
+            activeGifList.splice(i,1);
+        }
+        maxActiveGifs = 1;
+        gifTimerLimit = random(1000, 5000);
+        gifTimer = 0;
+    }
+
+    if(activeGifList.length < maxActiveGifs){
+        activeGifList.push(new blingee(width/2 + random(-400, 400),height/2 + random(-250, 250)));
+    }
+    
 }
 
 function cleanUpGifs(player){
@@ -783,14 +825,88 @@ class blingee{
         this.a = 255 * random(0.1, 0.75); //alpha values work on the 255 RGB scale
         this.lifetime = random(10) * 1000;
         this.timer = 0;
+        //this.correctPos();
+    }
+
+    correctPos(){ //this makes it so the gifs should be rendered out of bounds, ish
+        print("running correctPos");
+        if(this.x > width / 2){
+            this.x -= this.w / 2;
+        }else{
+            this.x += this.w / 2;
+        }
+
+        if(this.y > height/2){
+            this.y -= this.h / 2;
+        }else{
+            this.y += this.h / 2;
+        }
     }
 
     bling(){
+        imageMode(CENTER);
         tint(255, this.a);
        // image(this.image, this.x, this.y);
        // image(this.i, this.x, this.y, 100, 100);
-        image(giflist[this.i], this.x, this.y, this.w, this.h);
+        image(giflist[this.i], this.x, this.y);
         noTint();
+        imageMode(CORNER)
        // this.timer += deltaTime;
+    }
+}
+
+function drawWaveForm(){ //renders a waveform visual based on the audio currently playing, based off https://www.youtube.com/watch?v=uk96O7N1Yo0
+   // rectMode(CORNER);
+    //print("running drawWaveForm");
+   // stroke(random(155) + 100, random(155) + 100, random(155) + 100);
+    stroke(bgColor);
+    noFill();
+    strokeWeight(1.5);
+    var wave = fft.waveform();
+    var waveMult;
+    if(scoreMult1 > scoreMult2){
+        waveMult = scoreMult1;
+    }else{
+        waveMult = scoreMult2
+    }
+
+    beginShape();
+    for(var i = 0; i < width; i++){
+      //  print("drawing point " + i);
+        //var index = floor(map((i, 0, width, 0, wave.length)));
+        var index = floor(map(i, 0, width,0, wave.length));
+        var x = i;
+        var y = wave[index] * (100 * waveMult) + height / 2;
+       // point(x, y);
+        //square(x, y, 5);
+        vertex(x, y);
+
+    }
+    endShape();
+}
+
+function renderRipples(){
+    for(var i = 0;i < rippleList.length; i++){
+        rippleList[i].render();
+        if(rippleList[i].r >= width){
+            rippleList.splice(i, 1);
+        }
+    }
+}
+
+class ripple{
+    constructor(mult){
+        this.x = random(width);
+        this.y = random(height);
+        this.r = 1;
+        this.speed = mult;
+    }
+
+    render(){
+        this.r += this.speed * deltaTime;
+        stroke(bgColor);
+        strokeWeight(1);
+        noFill();
+        circle(this.x, this.y, this.r);
     }
 }
