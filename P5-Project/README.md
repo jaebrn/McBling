@@ -24,7 +24,7 @@ The objective of the game is to press the key corresponding to the number onscre
 Rights for gifs, fonts and songs used are reserved by the respective owners.
 
 ## Notes on code comments and documentation
-This game can uses a sound library and the p5js environment. It can be cloned from this github in order to have all the gifs and images assets. 
+This game  uses a sound library and the p5js environment. It can be cloned from this github in order to have all the gifs and images assets. 
 
 The inputs for Player 1 are as follows:
 1,2,3,4,5,6,7,8,9 & 0 on the keyboard (not numpad) as substitutions for the phone number keys. 'Enter' replaces the 'answer' button, and 'Backspace' replaces the 'decline' button.

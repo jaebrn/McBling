@@ -39,7 +39,7 @@ var timer1 = 0;
 var timer2 = 0;
 var timerLimit1 = 1000;
 var timerLimit2 = 1000;
-var timerMIN = 500;
+var timerMIN = 1000;
 var timerMAX = 2000;
 //timers are in milliseconds, so 1000 is one second
 
@@ -86,6 +86,9 @@ var fft; // waveform var (fast fourier transform - analyzes audio)
 //ripples
 var rippleList = []; //expanding circles created when a number is hit
 
+//countdown sound
+var countdownAudio;
+
 function preload() {
     //loads songs, fonts and images
     loadSongs();
@@ -93,6 +96,7 @@ function preload() {
     corners = loadImage('assets/images/corners.png');
     font = loadFont('assets/fonts/DS.ttf');
     gifTimerLimit = random(1000, 5000);
+    countdownAudio = loadSound('assets/sounds/countdown.mp3');
 }
 
 function loadGifs() {
@@ -199,9 +203,14 @@ function bg() {
 }
 
 function mainMenu() {
-    fill(255);
+    //Text:
     textAlign(CENTER, CENTER);
     textSize(135);
+    stroke(bgColor);
+    strokeWeight(38);
+    noFill();
+    text('MCBLING SPEED TEXTER 3000', width / 2, height / 4); //draws game title color changing outline
+    fill(255);
     stroke(255, 100);
     strokeWeight(20);
     text('MCBLING SPEED TEXTER 3000', width / 2, height / 4); //draws game title
@@ -224,7 +233,7 @@ function drawSongTitles() {
 function countdown() {
     timer = int(map(millis(), timerStart, timerStart + 3000, 4, 1)); // maps time to seconds (3, 2, 1...)
 
-    textSize(340);
+    textSize(590);
     fill(255);
     textAlign(CENTER, CENTER);
     text(timer, width / 2, height / 2); // displays timer as text
@@ -370,12 +379,15 @@ function end() { // called when song ends
 }
 
 function startCountdown() { //Begins countdown, registers game as singleplayer
+
+    countdownAudio.play();
     playerCount = 1; //registers singleplayer
     timerStart = millis(); // sets timer start time
     sceneIndex = 1; // changes scene
 }
 
 function startCountdown2() {
+    countdownAudio.play();
     playerCount = 2; //registers multiplayer
     timerStart = millis(); // sets timer start time
     sceneIndex = 1; // changes scene
