@@ -34,3 +34,9 @@ q,w,e,r,t,y,u,i,o & p on the keyboard as substitutions for the phone number keys
 Thank you for playing McBling Speed Texter 3000! We hope you enjoy.
 
 - Thomas, Jenna, & Carolie
+
+## Pictures of the presentation day and setup
+![DayOf](/P5-Project/assets/images/IMG_6004.JPG)
+![DayOf](/P5-Project/assets/images/IMG_6006.JPG)
+![DayOf](/P5-Project/assets/images/IMG_6010.JPG)
+![DayOf](/P5-Project/assets/images/IMG_6013.JPG)
